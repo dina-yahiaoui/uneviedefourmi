@@ -1,7 +1,5 @@
 # uneviedefourmi
 
-# uneviedefourmi
-
 Projet algorithmique — La Plateforme (B3 IA).
 Faire rejoindre le dortoir à toutes les fourmis d'une fourmilière, en un minimum d'étapes.
 
