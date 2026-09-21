@@ -7,70 +7,70 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from ants import parse_fourmiliere, simuler
+from ants import parse_anthill, simulate
 
-DOSSIER_FOURMILIERES = "fourmilieres"
-DOSSIER_SORTIE = "sorties"
-
-
-def afficher_etapes(etapes):
-    for i, etape in enumerate(etapes, start=1):
-        print(f"+++ E{i} +++")
-        for ligne in etape:
-            print(ligne)
+ANTHILL_DIR = "anthills"
+OUTPUT_DIR = "outputs"
 
 
-def dessiner_graphe(G, nom):
+def display_steps(steps):
+    for i, step in enumerate(steps, start=1):
+        print(f"+++ S{i} +++")
+        for line in step:
+            print(line)
+
+
+def draw_graph(G, name):
     pos = nx.spring_layout(G, seed=42)
-    couleurs = ["#8ecae6" if s == "Sv" else "#219ebc" if s == "Sd" else "#e9ecef" for s in G.nodes]
-    nx.draw(G, pos, with_labels=True, node_color=couleurs, node_size=800)
-    plt.title(nom)
-    plt.savefig(os.path.join(DOSSIER_SORTIE, f"{nom}_graphe.png"))
+    colors = ["#8ecae6" if s == "Sv" else "#219ebc" if s == "Sd" else "#e9ecef" for s in G.nodes]
+    nx.draw(G, pos, with_labels=True, node_color=colors, node_size=800)
+    plt.title(name)
+    plt.savefig(os.path.join(OUTPUT_DIR, f"{name}_graph.png"))
     plt.close()
 
 
-def dessiner_progression(etapes, F, nom):
-    arrivees = 0
-    valeurs = [0]
-    for etape in etapes:
-        arrivees += sum(1 for ligne in etape if ligne.endswith("Sd"))
-        valeurs.append(arrivees)
-    plt.plot(range(len(valeurs)), valeurs, marker="o")
-    plt.xlabel("etape")
-    plt.ylabel("fourmis arrivees au dortoir")
-    plt.title(nom)
-    plt.savefig(os.path.join(DOSSIER_SORTIE, f"{nom}_progression.png"))
+def draw_progression(steps, F, name):
+    arrivals = 0
+    values = [0]
+    for step in steps:
+        arrivals += sum(1 for line in step if line.endswith("Sd"))
+        values.append(arrivals)
+    plt.plot(range(len(values)), values, marker="o")
+    plt.xlabel("step")
+    plt.ylabel("ants arrived at the dorm")
+    plt.title(name)
+    plt.savefig(os.path.join(OUTPUT_DIR, f"{name}_progression.png"))
     plt.close()
 
 
-def traiter_fourmiliere(chemin_fichier):
-    nom = os.path.splitext(os.path.basename(chemin_fichier))[0]
-    F, G = parse_fourmiliere(chemin_fichier)
+def process_anthill(file_path):
+    name = os.path.splitext(os.path.basename(file_path))[0]
+    F, G = parse_anthill(file_path)
 
-    print(f"\n===== {nom} (F={F}) =====")
-    etapes = simuler(G, F)
-    afficher_etapes(etapes)
-    print(f"-> {len(etapes)} etapes necessaires pour que les {F} fourmis rejoignent le dortoir.")
+    print(f"\n===== {name} (F={F}) =====")
+    steps = simulate(G, F)
+    display_steps(steps)
+    print(f"-> {len(steps)} steps needed for the {F} ants to reach the dorm.")
 
-    dessiner_graphe(G, nom)
-    dessiner_progression(etapes, F, nom)
+    draw_graph(G, name)
+    draw_progression(steps, F, name)
 
-    return nom, len(etapes)
+    return name, len(steps)
 
 
 def main():
-    os.makedirs(DOSSIER_SORTIE, exist_ok=True)
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    fichiers = sys.argv[1:] or sorted(glob.glob(os.path.join(DOSSIER_FOURMILIERES, "*.txt")))
-    if not fichiers:
-        print(f"Aucun fichier fourmiliere trouve dans '{DOSSIER_FOURMILIERES}/'.")
+    files = sys.argv[1:] or sorted(glob.glob(os.path.join(ANTHILL_DIR, "*.txt")))
+    if not files:
+        print(f"No anthill file found in '{ANTHILL_DIR}/'.")
         return
 
-    resultats = [traiter_fourmiliere(chemin) for chemin in fichiers]
+    results = [process_anthill(path) for path in files]
 
-    print("\n===== RECAPITULATIF =====")
-    for nom, nb_etapes in resultats:
-        print(f"{nom:35s} -> {nb_etapes} etapes")
+    print("\n===== SUMMARY =====")
+    for name, nb_steps in results:
+        print(f"{name:35s} -> {nb_steps} steps")
 
 
 if __name__ == "__main__":
